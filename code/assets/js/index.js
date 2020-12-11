@@ -32,8 +32,6 @@
 // ...
 $(function(){
 //我们创建一个数组
-  let count1 = 0
-  let count2 = 0
   var data = JSON.parse(window.localStorage.getItem('data')) || []
   var complete = JSON.parse(window.localStorage.getItem('com')) || []
 
@@ -41,6 +39,9 @@ $(function(){
 //设置一个鼠标按下的事件
   bindHTML()
   Success()
+
+
+
   $("form  input").on('keydown' , function(e){
     const value = this.value.trim()
     if (!value) return
@@ -115,43 +116,55 @@ $(function(){
     Success()
   })
 
+
+
+  let ids 
   //实时改变框中的内容
-  $('#todolist').on('click' , 'li  > p' , function(){
-    // console.log('点解了')
-    $(this).after($('<input type="text" class="p2" style="">'))
-    // console.log($(this).html())
-    // console.log($(this).prev('.p1'))
-    var p = $(this)
-    $(this).css('display','none')
+  $('#todolist').on('click' , 'li  > p' , function(e){
+    e.stopPropagation()
+    console.log('鼠标按下的事件clickclickclickclickclickclickclickclick')
+    $(this).after($('<input type="text" class="p2" style="" autofocus="autofocus">'))//这里就在li的最后面添加一个input标签
     $(this).next('.p2').css({
       width:$(this).width(),
       position:'absolute',
       left:$(this).css('left')
-    })
-    // console.log($('.p2').val())
-    var id = $(this).data('id')
+    }) //让点击后添加的input的定位定再p的位置上
+    let id = $(this).data('id') //这里获取点击p上的数组中的那个位置
+    console.log($(this))
+    ids = id
+    console.log(id , '222222222222222222222222222222')
     // console.log(id , data[id])
-    $('#todolist').on('keydown' , '.p2' , function(e){
+    /////////////////键盘点击事件///////////////////
+    $('#todolist').on('keydown' , 'li .p2' , function(e){
+      console.log('键盘按下事件keydownkeydownkeydownkeydownkeydownkeydownkeydown')
+      //这里我们添加一个点击事件  键盘按下的时候就会被触发
       e = e || window.event
       var code = e.keyCode || e.which
-      if(code === 13){
-        // console.log($(this).val())
-        const input = $(this)
-        console.log(input)
-        console.log(p)
-        data[id] = $(this).val()
-        console.log(p , id)
-        p.css('display' , 'block')
+      if(code == 13){//如果我们按下回车按钮的时候
+        console.log('按下回车-----------------------------------------------------------------')
+        data[id] = $(this).val() //这里时改变window数组中的数值
+        console.log('这是id'  , id )
+        console.log('这是ids' ,  ids ) //
         window.localStorage.setItem('data' , JSON.stringify(data))
         bindHTML()
-        // input.css('display' , 'none')
+        console.log('按下回车键结束----------------------------------------------------------------')
       }
       console.log(data)
+      //键盘按下事件结束
+      console.log('按下键盘结束keydownkeydownkeydownkeydownkeydownkeydownkeydownkeydown')
       
     })
-    
+    ////////////////////////////////////
+    console.log('结束点击事件clickclickclickclickclickclickclickclick')
     // bindHTML()
   })
+  //这里我一直再想一个问题  为什么把我   键盘按下 的事件放再里面的时候  第一次可以改变对应点击的值
+  //然而第二次为什么我改变不了
+  //主要原因:由于点击第二次input的时候 实际触发点击事件的时  上面触发input的点击事件
+  //由于作用域的问题 ,他是一个私有作用域 且 全局作用域中还没有这个值,他一直存储的值就是上次点击的 id 值
+  //这里 还有一个问题就是 为什么 第二次 没有先赋值给 id=2 主要因为如下
+  //第一次点击  p 的点击事件   键盘按下的事件并没有触发  我们需要再点击一次input才回触发焦点
+  // 再次点击的时候 我们就要先执行键盘按下  事件  再执行 第一次点击 p 的点击事件 的  键盘按下事件  所以会有两次点击事件
   
    //这个是渲染代办事件的地方
    function bindHTML(){
@@ -180,7 +193,6 @@ $(function(){
           <a data-id="${i}">-</a>
       </li>
       `
-      count2++
     }
     $('#donecount').html(complete.length)
     $('#donelist').html(str)
